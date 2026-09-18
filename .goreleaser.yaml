@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+project_name: kk
+
+builds:
+  - id: kk
+    main: ./cmd/kk
+    binary: kk
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/kevinle128/skills/internal/buildinfo.Version={{ .Version }}
+      - -X github.com/kevinle128/skills/internal/buildinfo.Commit={{ .Commit }}
+      - -X github.com/kevinle128/skills/internal/buildinfo.BuildDate={{ .Date }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: kk
+    ids:
+      - kk
+    formats:
+      - tar.gz
+    name_template: "kk_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - none*
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  disable: true
+
+release:
+  github:
+    owner: kevinle128
+    name: skills

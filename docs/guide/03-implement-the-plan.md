@@ -1,13 +1,13 @@
 # Implement the Plan
 
-`kevinle128-skills:implement` turns an accepted plan or clear implementation contract into verified code.
+`kk:implement` turns an accepted plan or clear implementation contract into verified code.
 
 It owns implementation sequencing, approval gates, testing, review, progress synchronization, and final Git handoff.
 
 ## Start from a Plan
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan-directory/plan.md
+/kk:implement /absolute/path/to/plan-directory/plan.md
 ```
 
 The implementation workflow reads the plan files, respects phase dependencies and file ownership, and keeps their completion state synchronized.
@@ -15,7 +15,7 @@ The implementation workflow reads the plan files, respects phase dependencies an
 You can also provide a natural-language task.
 
 ```text
-/kevinle128-skills:implement "Add a health-check endpoint with integration coverage" --fast
+/kk:implement "Add a health-check endpoint with integration coverage" --fast
 ```
 
 When no accepted plan exists, the workflow still scouts and creates a plan before writing implementation code.
@@ -42,7 +42,7 @@ Only `--auto` runs continuously without routine approval stops.
 - `--skip-journal` skips the optional journal step.
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan.md --parallel --tdd
+/kk:implement /absolute/path/to/plan.md --parallel --tdd
 ```
 
 ## What the Workflow Does
@@ -75,7 +75,7 @@ An independent reviewer checks acceptance criteria, regressions, public contract
 Use parallel mode only when the plan assigns exclusive files and declares dependencies.
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan.md --parallel
+/kk:implement /absolute/path/to/plan.md --parallel
 ```
 
 Independent phases may run concurrently.
@@ -87,7 +87,7 @@ Do not use parallel mode to make multiple agents edit the same files or shared m
 ## Tests-First Execution
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan.md --tdd
+/kk:implement /absolute/path/to/plan.md --tdd
 ```
 
 Each phase follows this order:

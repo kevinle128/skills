@@ -2,16 +2,16 @@
 
 A useful plan tells an implementer what to change, why the sequence matters, and how to prove the complete user flow works.
 
-`kevinle128-skills:plan` is the main planning skill.
+`kk:plan` is the main planning skill.
 
-It uses `kevinle128-skills:brainstorm`, `kevinle128-skills:scout`, research skills, `kevinle128-skills:validate-plan`, and adversarial review as the task requires.
+It uses `kk:brainstorm`, `kk:scout`, research skills, `kk:validate-plan`, and adversarial review as the task requires.
 
 ## Start with the Delivery Contract
 
-Use [`kevinle128-skills:brainstorm`](../../skills/brainstorm/SKILL.md) when the request does not yet define a stable outcome or when multiple implementation directions are credible.
+Use [`kk:brainstorm`](../../skills/kk-brainstorm/SKILL.md) when the request does not yet define a stable outcome or when multiple implementation directions are credible.
 
 ```text
-/kevinle128-skills:brainstorm We need users to change runtime model settings without restarting their session.
+/kk:brainstorm We need users to change runtime model settings without restarting their session.
 ```
 
 The result must contain the outcome, constraints, non-goals, and observable acceptance criteria.
@@ -20,22 +20,22 @@ The brainstorm is not a substitute for codebase evidence.
 
 If the request is a bug, the workflow scouts and diagnoses before choosing a repair.
 
-## Find the Real Production Path
+## Find the Real Runtime Path
 
-Use [`kevinle128-skills:scout`](../../skills/scout/SKILL.md) to locate the entry surface, current owner, internal calls, tests, and public contracts.
+Use [`kk:scout`](../../skills/kk-scout/SKILL.md) to locate the entry surface, current owner, internal calls, tests, and public contracts.
 
 ```text
-/kevinle128-skills:scout Find every user-facing path that changes session runtime settings and trace it to the live worker.
+/kk:scout Find every entry point that changes a user setting and trace it to the observable result.
 ```
 
-Use [`kevinle128-skills:docs-seeker`](../../skills/docs-seeker/SKILL.md) when the plan depends on current third-party APIs or framework behavior.
+Use [`kk:docs-seeker`](../../skills/kk-docs-seeker/SKILL.md) when the plan depends on current third-party APIs or framework behavior.
 
-Use [`kevinle128-skills:repomix`](../../skills/repomix/SKILL.md) when a repository or external codebase must be packed into a focused analysis artifact.
+Use [`kk:repomix`](../../skills/kk-repomix/SKILL.md) when a repository or external codebase must be packed into a focused analysis artifact.
 
 ## Select a Planning Mode
 
 ```text
-/kevinle128-skills:plan <task> [mode] [composable flags]
+/kk:plan <task> [mode] [composable flags]
 ```
 
 | Mode | Use it when | Main behavior |
@@ -59,7 +59,7 @@ The main composable flags are:
 - `--skip-journal` skips the optional journal step.
 - `--global` places a cross-project plan in the configured global plan root.
 
-The complete flag contract lives in [`kevinle128-skills:plan`](../../skills/plan/SKILL.md).
+The complete flag contract lives in [`kk:plan`](../../skills/kk-plan/SKILL.md).
 
 ## Write for the Implementer
 
@@ -84,24 +84,28 @@ Mock third-party systems at their boundary.
 
 Call internal services through their real integration path and prepare realistic test data.
 
-If no user or system trigger exists for a required behavior, stop and ask the user to select a production surface before claiming the plan is implementable.
+Every planning mode runs the Runtime Flow Proof Gate before the plan is ready.
+
+If no user or system trigger exists for a required behavior, stop and ask the user to select a runtime surface before claiming the plan is implementable.
+
+The plan must record one proof row per feature and cannot proceed while any row is `FAILED` or `NEEDS_DECISION`.
 
 ## Validate the Plan
 
 ```text
-/kevinle128-skills:validate-plan /absolute/path/to/plan-directory
+/kk:validate-plan /absolute/path/to/plan-directory
 ```
 
-Validation checks plan claims against the codebase, interviews the user about material decisions, propagates the answers into affected phases, and performs a whole-plan consistency sweep.
+Validation rechecks the Runtime Flow Proof Matrix against the codebase, interviews the user about material decisions, propagates the answers into affected phases, and performs a whole-plan consistency sweep.
 
-The complete validation contract lives in [`kevinle128-skills:validate-plan`](../../skills/validate-plan/SKILL.md).
+The complete validation contract lives in [`kk:validate-plan`](../../skills/kk-validate-plan/SKILL.md).
 
 Failed verification claims must be revised before implementation.
 
 ## Red-Team the Plan
 
 ```text
-/kevinle128-skills:plan red-team /absolute/path/to/plan-directory
+/kk:plan red-team /absolute/path/to/plan-directory
 ```
 
 Red-team review uses independent hostile lenses for security, assumptions, failure modes, scope, and complexity.
@@ -118,10 +122,10 @@ AgentKit's `ak plan` database is a rebuildable index over those files.
 
 GitHub issues and AgentWiki pages are optional projections and never replace the local plan files.
 
-After approval, hand the absolute plan path to `kevinle128-skills:implement`.
+After approval, hand the absolute plan path to `kk:implement`.
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan-directory/plan.md
+/kk:implement /absolute/path/to/plan-directory/plan.md
 ```
 
 Next: [Implement the plan](./03-implement-the-plan.md).

@@ -1,18 +1,306 @@
-# Kevin Kit
+# KevinKit
 
-Kevin Kit is my personal collection of reusable AI-agent skills for vibe coding.
+KevinKit is my personal collection of reusable AI-agent skills for vibe coding.
 
 It stores the workflows I use to research codebases, design solutions, create implementation plans, validate decisions, and move from an idea to working software.
 
-The current core skills are `kevinle128-skills:plan`, `kevinle128-skills:validate-plan`, and `kevinle128-skills:implement`.
+KevinKit is open source and has no license enforcement, account, login, analytics, paid registry, or entitlement check.
+
+The current core skills are `kk:plan`, `kk:validate-plan`, and `kk:implement`.
+
+## Set Up the `kk` CLI
+
+KevinKit ships as one `kk` binary with all skills embedded.
+
+Release archives support macOS and Linux on `amd64` and `arm64`.
+
+Install the binary in a user-writable directory so `kk update` can replace it without `sudo`.
+
+### 1. Select the Release Archive
+
+Download the latest release archive and `checksums.txt` from [GitHub Releases](https://github.com/kevinle128/skills/releases).
+
+Use this table to select the archive suffix for your computer.
+
+| Computer | Archive suffix |
+| --- | --- |
+| Apple silicon Mac | `darwin_arm64.tar.gz` |
+| Intel Mac | `darwin_amd64.tar.gz` |
+| ARM64 Linux | `linux_arm64.tar.gz` |
+| AMD64 or x86-64 Linux | `linux_amd64.tar.gz` |
+
+The complete archive name is `kk_<version>_<os>_<arch>.tar.gz`.
+
+You can also download a specific version from a terminal.
+
+Set `VERSION`, `OS`, and `ARCH` to match the release and your computer.
+
+```bash
+VERSION="<version-without-v>"
+OS="darwin"
+ARCH="arm64"
+ARCHIVE="kk_${VERSION}_${OS}_${ARCH}.tar.gz"
+
+curl -fLO "https://github.com/kevinle128/skills/releases/download/v${VERSION}/${ARCHIVE}"
+curl -fLO "https://github.com/kevinle128/skills/releases/download/v${VERSION}/checksums.txt"
+```
+
+### 2. Verify the Download
+
+Verify the archive before you extract or run it.
+
+On macOS, run:
+
+```bash
+set -o pipefail
+grep "  ${ARCHIVE}$" checksums.txt | shasum -a 256 --check
+```
+
+On Linux, run:
+
+```bash
+set -o pipefail
+grep "  ${ARCHIVE}$" checksums.txt | sha256sum --check
+```
+
+The command must report the archive as `OK`.
+
+Do not install the archive when verification fails or no matching checksum exists.
+
+### 3. Install the Binary
+
+Extract the archive and install `kk` in `~/.local/bin`.
+
+```bash
+tar -xzf "$ARCHIVE"
+install -d "$HOME/.local/bin"
+install -m 0755 kk "$HOME/.local/bin/kk"
+```
+
+Add this line to `~/.zshrc`, `~/.bashrc`, or the startup file for your shell when `~/.local/bin` is not already on `PATH`.
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Start a new terminal, then verify the installation.
+
+```bash
+kk version
+kk --help
+```
+
+### Install from Source
+
+Go 1.24 or later can install a development build.
+
+```bash
+go install github.com/kevinle128/skills/cmd/kk@latest
+export PATH="$(go env GOPATH)/bin:$PATH"
+kk version
+```
+
+A source-installed binary reports the version as `dev` until `kk update --yes` replaces it with a published release.
+
+## Install the Skills
+
+Preview the initial installation without writing files.
+
+```bash
+kk install --dry-run
+```
+
+Install all embedded skills for Codex, Claude Code, and Devin.
+
+```bash
+kk install
+```
+
+The default target is `all`.
+
+| Target | Runtime | Skill root |
+| --- | --- | --- |
+| `agents` | Codex and Devin | `~/.agents/skills` |
+| `claude-code` | Claude Code | `~/.claude/skills` |
+| `all` | Codex, Devin, and Claude Code | Both roots |
+
+Install only one target when required.
+
+```bash
+kk install --target agents
+kk install --target claude-code
+```
+
+Start a new agent session after installation so the runtime reloads its skill catalog.
+
+## Use the CLI
+
+### Check the Installation
+
+```bash
+kk status
+```
+
+`status: clean` means the installed files match the KevinKit ownership manifest.
+
+`status: drift` lists missing, modified, or stale managed files and returns exit code `1`.
+
+Use `--target` to inspect one runtime root.
+
+```bash
+kk status --target agents
+```
+
+### Synchronize the Embedded Skills
+
+Run `install` again after moving the binary or when you need to restore missing clean files.
+
+```bash
+kk install
+```
+
+This command synchronizes the skills embedded in the current binary.
+
+It does not download a newer release.
+
+### Update KevinKit
+
+Check for a newer stable release without changing local state.
+
+```bash
+kk update --check
+```
+
+Preview the release that would be installed.
+
+```bash
+kk update --dry-run
+```
+
+Verify the published checksum, replace the current binary, and synchronize the new embedded skills.
+
+```bash
+kk update --yes
+```
+
+Limit the skill synchronization to one target when required.
+
+```bash
+kk update --target agents --yes
+```
+
+The updater keeps a backup of the previous binary under `~/.kevinkit/backups/`.
+
+### Protect Local Changes
+
+KevinKit records the SHA-256 value of each file that it installs.
+
+Normal install, update, and uninstall operations preserve user-modified and unknown files.
+
+Use `status` to review these files before you decide what to do.
+
+```bash
+kk status
+```
+
+Use force only when you want to replace conflicting files with the embedded copies.
+
+```bash
+kk install --force --yes
+```
+
+You can also allow an update to replace conflicts after it downloads the verified release.
+
+```bash
+kk update --force --yes
+```
+
+KevinKit creates recovery copies under `~/.kevinkit/backups/` before destructive writes.
+
+### Uninstall the Skills
+
+Preview removal first.
+
+```bash
+kk uninstall --dry-run
+```
+
+Remove clean managed files from all targets.
+
+```bash
+kk uninstall --yes
+```
+
+Remove files from one target only.
+
+```bash
+kk uninstall --target claude-code --yes
+```
+
+Uninstall preserves modified and unknown files.
+
+Remove the `kk` binary separately when you no longer need the CLI.
+
+```bash
+rm "$HOME/.local/bin/kk"
+```
+
+## CLI Reference
+
+| Command | Result |
+| --- | --- |
+| `kk install` | Install or synchronize the skills embedded in the current binary. |
+| `kk update --yes` | Install a checksum-verified release and synchronize its embedded skills. |
+| `kk update --check` | Report whether a newer stable release is available without writing. |
+| `kk status` | Report installed targets and managed-file drift. |
+| `kk uninstall --yes` | Remove clean managed files and preserve user files. |
+| `kk version` | Print CLI build metadata and the embedded kit version. |
+| `kk help <command>` | Print usage for one command. |
+
+Run `kk help <command>` for the exact flags accepted by a command.
+
+## Troubleshooting
+
+### `kk: command not found`
+
+Confirm that the directory containing `kk` is on `PATH`.
+
+```bash
+command -v kk
+printf '%s\n' "$PATH"
+```
+
+Add `~/.local/bin` or `$(go env GOPATH)/bin` to your shell startup file, then start a new terminal.
+
+### `status: drift`
+
+Run `kk status` and review every reported path.
+
+Keep the files unchanged when they contain work that you want to preserve.
+
+Run `kk install --force --yes` only when you want to discard those changes and restore the embedded copies.
+
+### Update Cannot Replace the Binary
+
+The directory that contains the running `kk` binary must be writable by the current user.
+
+Install `kk` under `~/.local/bin` instead of running `kk update` with `sudo`.
+
+Running the lifecycle commands with `sudo` would resolve a different home directory and target the wrong skill roots.
+
+### Inspect Local State
+
+KevinKit keeps its ownership manifest, lifecycle lock, and backups under `~/.kevinkit`.
+
+Do not edit `install-manifest.json` manually.
 
 ## Guide
 
-Start with [The Kevin Kit Guide](./docs/guide/README.md) for workflow selection, practical examples, and the complete skill catalog.
+Start with [The KevinKit Guide](./docs/guide/README.md) for workflow selection, practical examples, and the complete skill catalog.
 
-## `kevinle128-skills:plan`
+## `kk:plan`
 
-`kevinle128-skills:plan` creates implementation-ready technical plans from a task description.
+`kk:plan` creates implementation-ready technical plans from a task description.
 
 It can inspect an existing codebase, research unfamiliar areas, compare solution approaches, organize work into phases, define test coverage, review risks, and prepare a handoff to implementation.
 
@@ -22,7 +310,7 @@ AgentKit maintains a rebuildable plan index around those files.
 
 ### Requirements
 
-- A compatible AI-agent runtime that can load skills from this plugin.
+- A compatible AI-agent runtime that can load standalone skills.
 - The AgentKit `ak` CLI for plan scaffolding, indexing, and phase status operations.
 - `gh` authentication when using `--github`.
 - AgentWiki CLI authentication or AgentWiki MCP access when using `--wiki`.
@@ -34,21 +322,21 @@ Before it changes plan state, the skill checks the live `ak plan` help output in
 Create a plan from a task description:
 
 ```text
-/kevinle128-skills:plan Add session-based authentication to the API
+/kk:plan Add session-based authentication to the API
 ```
 
-When no mode flag is supplied, `kevinle128-skills:plan` selects a mode from the task scope and codebase evidence.
+When no mode flag is supplied, `kk:plan` selects a mode from the task scope and codebase evidence.
 
 You can select a mode explicitly:
 
 ```text
-/kevinle128-skills:plan Add session-based authentication to the API --hard
+/kk:plan Add session-based authentication to the API --hard
 ```
 
 Flags can be combined:
 
 ```text
-/kevinle128-skills:plan Refactor the payment workflow --deep --tdd --github
+/kk:plan Refactor the payment workflow --deep --tdd --github
 ```
 
 When invoked without a task or subcommand, the skill asks whether to create, archive, or red-team a plan.
@@ -95,7 +383,7 @@ Adds a tests-first structure to every implementation phase.
 Each phase identifies tests for existing behavior, the protected implementation work, tests for new behavior, and a regression gate containing the required test and compile or type-check commands.
 
 ```text
-/kevinle128-skills:plan Replace the cache implementation --hard --tdd
+/kk:plan Replace the cache implementation --hard --tdd
 ```
 
 ### `--no-tasks`
@@ -105,7 +393,7 @@ Skips task hydration after the plan files are written.
 Use this when you want the plan documents but do not want phases mirrored into the available task-management system.
 
 ```text
-/kevinle128-skills:plan Explore a new event-processing architecture --two --no-tasks
+/kk:plan Explore a new event-processing architecture --two --no-tasks
 ```
 
 ### `--html`
@@ -117,7 +405,7 @@ The HTML plan includes phase summaries, full phase details, an implementation wo
 The file contains inline CSS and JavaScript and does not require a build step or network assets.
 
 ```text
-/kevinle128-skills:plan Redesign the project dashboard --deep --html
+/kk:plan Redesign the project dashboard --deep --html
 ```
 
 When `--html` is combined with `--github`, a concise `plan.md` index is also kept so the GitHub issue has a stable Markdown link.
@@ -133,7 +421,7 @@ The local plan files remain canonical.
 If the repository has no GitHub remote or `gh` is not authenticated, publishing is skipped without invalidating the plan.
 
 ```text
-/kevinle128-skills:plan Add organization-level permissions --hard --github
+/kk:plan Add organization-level permissions --hard --github
 ```
 
 ### `--wiki`
@@ -147,7 +435,7 @@ Public publication happens only when the user explicitly requests it.
 If AgentWiki is unavailable or authentication fails, publishing is skipped without blocking plan creation.
 
 ```text
-/kevinle128-skills:plan Document the new deployment architecture --hard --wiki
+/kk:plan Document the new deployment architecture --hard --wiki
 ```
 
 ### `--advice`
@@ -159,7 +447,7 @@ The supervisor reviews major planning checkpoints, difficult blockers, high-stak
 It advises the primary agent but does not replace approval, validation, or review gates.
 
 ```text
-/kevinle128-skills:plan Migrate the authorization model --deep --advice
+/kk:plan Migrate the authorization model --deep --advice
 ```
 
 ### `--yagni`
@@ -171,7 +459,7 @@ Without this flag, the skill preserves the full requested scope.
 The flag is forwarded to planning subagents and downstream workflows so the scope decision remains active.
 
 ```text
-/kevinle128-skills:plan Simplify the notification service --hard --yagni
+/kk:plan Simplify the notification service --hard --yagni
 ```
 
 ### `--skip-journal`
@@ -181,7 +469,7 @@ Skips the optional journal step.
 This is useful for temporary planning sessions or when the plan does not need a chronological project record.
 
 ```text
-/kevinle128-skills:plan archive ./plans/260918-authentication --skip-journal
+/kk:plan archive ./plans/260918-authentication --skip-journal
 ```
 
 ### `--global`
@@ -193,21 +481,23 @@ Use it only when the plan is intentionally shared across projects.
 Global scope is also allowed when no project context exists.
 
 ```text
-/kevinle128-skills:plan Standardize release checks across repositories --global --hard
+/kk:plan Standardize release checks across repositories --global --hard
 ```
 
-## `kevinle128-skills:validate-plan`
+## `kk:validate-plan`
 
-Validates an existing plan against the real codebase and proves every feature through its production trigger and end-to-end test.
+Validates an existing plan against the real codebase and rechecks every feature through its runtime trigger and end-to-end test.
 
-If a production surface is missing, it opens a HITL question with codebase-grounded options and a recommendation.
+`kk:plan` runs the same Runtime Flow Proof Gate before it marks a new plan ready, including in `--fast` mode.
+
+If a runtime surface is missing, either skill opens a HITL question with codebase-grounded options and a recommendation.
 It records confirmed decisions, propagates them to affected phases, and runs a whole-plan consistency sweep before recommending implementation.
 
 ```text
-/kevinle128-skills:validate-plan /absolute/path/to/plans/260918-authentication
+/kk:validate-plan /absolute/path/to/plans/260918-authentication
 ```
 
-## `kevinle128-skills:plan` Subcommands
+## `kk:plan` Subcommands
 
 ### `red-team`
 
@@ -218,7 +508,7 @@ Independent reviewers examine security, assumptions, failure modes, scope, and c
 Only findings with codebase evidence are considered, and the user decides which accepted findings are applied.
 
 ```text
-/kevinle128-skills:plan red-team /absolute/path/to/plans/260918-authentication
+/kk:plan red-team /absolute/path/to/plans/260918-authentication
 ```
 
 ### `archive`
@@ -228,7 +518,7 @@ Archives one or more plans in the AgentKit index after user confirmation.
 Archiving changes index visibility and does not delete or move the canonical Markdown files.
 
 ```text
-/kevinle128-skills:plan archive /absolute/path/to/plans/260918-authentication
+/kk:plan archive /absolute/path/to/plans/260918-authentication
 ```
 
 Use `--skip-journal` with this subcommand when no journal entry is required.
@@ -238,37 +528,37 @@ Use `--skip-journal` with this subcommand when no journal entry is required.
 Create a quick plan for a well-understood change:
 
 ```text
-/kevinle128-skills:plan Add a health-check endpoint --fast
+/kk:plan Add a health-check endpoint --fast
 ```
 
 Plan a production feature with tests-first implementation phases:
 
 ```text
-/kevinle128-skills:plan Add passwordless login --hard --tdd
+/kk:plan Add passwordless login --hard --tdd
 ```
 
 Plan a large refactor and produce an interactive review artifact:
 
 ```text
-/kevinle128-skills:plan Replace the job scheduler --deep --tdd --html
+/kk:plan Replace the job scheduler --deep --tdd --html
 ```
 
 Prepare independent work for parallel implementation:
 
 ```text
-/kevinle128-skills:plan Build the API, admin UI, and audit pipeline --parallel --tdd
+/kk:plan Build the API, admin UI, and audit pipeline --parallel --tdd
 ```
 
 Compare two architectures before committing to one:
 
 ```text
-/kevinle128-skills:plan Introduce multi-region data replication --two --advice
+/kk:plan Introduce multi-region data replication --two --advice
 ```
 
 Publish a reviewed plan to GitHub and AgentWiki:
 
 ```text
-/kevinle128-skills:plan Add tenant isolation --deep --github --wiki
+/kk:plan Add tenant isolation --deep --github --wiki
 ```
 
 ## Plan Output
@@ -284,22 +574,22 @@ Each standard plan contains:
 
 The generated files remain editable and are the source of truth even when AgentKit task state, GitHub issues, or AgentWiki pages are also created.
 
-## `kevinle128-skills:implement`
+## `kk:implement`
 
-`kevinle128-skills:implement` executes an accepted plan or implements a clearly defined task through a structured delivery workflow.
+`kk:implement` executes an accepted plan or implements a clearly defined task through a structured delivery workflow.
 
 It supports interactive approval gates, fast execution, parallel agents, autonomous execution, tests-first development, testing, code review, plan synchronization, and final Git operations.
 
 Use it directly with a task:
 
 ```text
-/kevinle128-skills:implement "Add user authentication to the app" --interactive
+/kk:implement "Add user authentication to the app" --interactive
 ```
 
-Use it with a plan created by `kevinle128-skills:plan`:
+Use it with a plan created by `kk:plan`:
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan-directory/plan.md
+/kk:implement /absolute/path/to/plan-directory/plan.md
 ```
 
 The implementation modes are `--interactive`, `--fast`, `--parallel`, `--auto`, and `--no-test`.
@@ -308,16 +598,16 @@ The composable flags are `--tdd`, `--advice`, `--yagni`, and `--skip-journal`.
 
 ## Implementation Handoff
 
-After reviewing and approving a plan, start implementation with the absolute plan path shown by `kevinle128-skills:plan`:
+After reviewing and approving a plan, start implementation with the absolute plan path shown by `kk:plan`:
 
 ```text
-/kevinle128-skills:implement /absolute/path/to/plan-directory/plan.md
+/kk:implement /absolute/path/to/plan-directory/plan.md
 ```
 
 For a parallel plan, use:
 
 ```text
-/kevinle128-skills:implement --parallel /absolute/path/to/plan-directory/plan.md
+/kk:implement --parallel /absolute/path/to/plan-directory/plan.md
 ```
 
 When the plan was created with `--tdd`, keep `--tdd` in the implementation handoff.
@@ -326,10 +616,9 @@ The skill recommends clearing the planning context before implementation so the 
 
 ## Repository Layout
 
-- `.codex-plugin/plugin.json` contains the plugin metadata.
-- `skills/plan/SKILL.md` contains the main planning workflow.
-- `skills/plan/references/` contains the supporting workflow contracts.
-- `skills/implement/SKILL.md` contains the implementation workflow.
-- `skills/implement/references/` contains its routing, review, and execution contracts.
+- `skills/kk-plan/SKILL.md` contains the main planning workflow.
+- `skills/kk-plan/references/` contains the supporting workflow contracts.
+- `skills/kk-implement/SKILL.md` contains the implementation workflow.
+- `skills/kk-implement/references/` contains its routing, review, and execution contracts.
 
-More Kevin Kit skills can be added under `skills/` as the collection grows.
+More KevinKit skills can be added under `skills/` as the collection grows.

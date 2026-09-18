@@ -2,29 +2,29 @@
 
 A symptom is not a root cause.
 
-Kevin Kit separates diagnosis from repair so the implementation fixes the shared failure point instead of patching one visible caller.
+KevinKit separates diagnosis from repair so the implementation fixes the shared failure point instead of patching one visible caller.
 
-## Use `kevinle128-skills:debug` for Diagnosis
+## Use `kk:debug` for Diagnosis
 
-Use [`kevinle128-skills:debug`](../../skills/debug/SKILL.md) when you need to explain a failure before deciding whether to change code.
+Use [`kk:debug`](../../skills/kk-debug/SKILL.md) when you need to explain a failure before deciding whether to change code.
 
 ```text
-/kevinle128-skills:debug The worker applies stale model settings after an idle wake.
+/kk:debug The worker applies stale model settings after an idle wake.
 ```
 
 The diagnostic result should identify the exact symptom, reproduction, expected and actual behavior, execution path, root cause, and evidence that rules out competing hypotheses.
 
 Stop after diagnosis when the user requested investigation only.
 
-## Use `kevinle128-skills:fix` for Repair
+## Use `kk:fix` for Repair
 
-Use [`kevinle128-skills:fix`](../../skills/fix/SKILL.md) for a concrete bug, failed test, type error, lint failure, or CI failure.
+Use [`kk:fix`](../../skills/kk-fix/SKILL.md) for a concrete bug, failed test, type error, lint failure, or CI failure.
 
 ```text
-/kevinle128-skills:fix The session worker uses the previous model after settings are updated --review
+/kk:fix The session worker uses the previous model after settings are updated --review
 ```
 
-`kevinle128-skills:fix` begins with a bounded repair contract, scouts the affected path, reproduces the problem, proves the cause, implements the repair, and reruns verification.
+`kk:fix` begins with a bounded repair contract, scouts the affected path, reproduces the problem, proves the cause, implements the repair, and reruns verification.
 
 ## Fix Modes
 
@@ -62,19 +62,19 @@ For third-party calls, mock the third party at its boundary while keeping intern
 
 ## Supporting Skills
 
-- [`kevinle128-skills:scout`](../../skills/scout/SKILL.md) finds owners, callers, tests, and recent changes.
-- [`kevinle128-skills:sequential-thinking`](../../skills/sequential-thinking/SKILL.md) manages multi-step hypotheses that need revision.
-- [`kevinle128-skills:problem-solving`](../../skills/problem-solving/SKILL.md) reframes the problem after repeated dead ends.
-- [`kevinle128-skills:agent-browser`](../../skills/agent-browser/SKILL.md) reproduces clean browser and Electron flows.
-- [`kevinle128-skills:chrome-profile`](../../skills/chrome-profile/SKILL.md) reproduces behavior that depends on the user's real Chrome login or cookies.
-- [`kevinle128-skills:test`](../../skills/test/SKILL.md) runs the focused and broad validation suites.
-- [`kevinle128-skills:code-review`](../../skills/code-review/SKILL.md) checks the final repair for regressions and contract breaks.
+- [`kk:scout`](../../skills/kk-scout/SKILL.md) finds owners, callers, tests, and recent changes.
+- [`kk:sequential-thinking`](../../skills/kk-sequential-thinking/SKILL.md) manages multi-step hypotheses that need revision.
+- [`kk:problem-solving`](../../skills/kk-problem-solving/SKILL.md) reframes the problem after repeated dead ends.
+- [`kk:agent-browser`](../../skills/kk-agent-browser/SKILL.md) reproduces clean browser and Electron flows.
+- [`kk:chrome-profile`](../../skills/kk-chrome-profile/SKILL.md) reproduces behavior that depends on the user's real Chrome login or cookies.
+- [`kk:test`](../../skills/kk-test/SKILL.md) runs the focused and broad validation suites.
+- [`kk:code-review`](../../skills/kk-code-review/SKILL.md) checks the final repair for regressions and contract breaks.
 
 ## Failed Attempts
 
 After three failed repair attempts, stop repeating local variations.
 
-Question the architecture, restate the evidence, and use `kevinle128-skills:problem-solving` or advisory supervision to select a new direction.
+Question the architecture, restate the evidence, and use `kk:problem-solving` or advisory supervision to select a new direction.
 
 ## Pitfall: Guarding the Symptom
 

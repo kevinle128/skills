@@ -1,0 +1,94 @@
+name: Release KevinKit
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            goos: linux
+            goarch: amd64
+          - runner: ubuntu-24.04-arm
+            goos: linux
+            goarch: arm64
+          - runner: macos-15-intel
+            goos: darwin
+            goarch: amd64
+          - runner: macos-15
+            goos: darwin
+            goarch: arm64
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+          cache: true
+      - name: Run tests
+        run: go test ./...
+      - name: Verify native release target
+        shell: bash
+        run: |
+          test "$(go env GOOS)" = "${{ matrix.goos }}"
+          test "$(go env GOARCH)" = "${{ matrix.goarch }}"
+      - name: Run race tests
+        run: go test -race ./...
+      - name: Run vet
+        run: go vet ./...
+      - name: Build CLI
+        run: go build ./cmd/kk
+
+  release:
+    name: Publish verified archives
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+          cache: true
+      - name: Build snapshot archives
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean
+      - name: Inspect snapshot archives and checksums
+        shell: bash
+        run: |
+          mapfile -t archives < <(find dist -maxdepth 1 -type f -name 'kk_*.tar.gz' | sort)
+          test "${#archives[@]}" -eq 4
+          for archive in "${archives[@]}"; do
+            test "$(tar -tzf "$archive")" = "kk"
+          done
+          test -f dist/checksums.txt
+          (cd dist && sha256sum -c checksums.txt)
+      - name: Remove snapshot output
+        run: rm -rf dist
+      - name: Publish release
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
