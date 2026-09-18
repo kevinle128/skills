@@ -1,0 +1,21 @@
+{
+  "name": "kevinle128-skills",
+  "version": "0.1.3",
+  "description": "Planning and implementation skills maintained by kevinle128.",
+  "author": {
+    "name": "kevinle128"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kevin Le Skills",
+    "shortDescription": "Production-ready planning and delivery workflows.",
+    "longDescription": "Custom skills for implementation-ready planning and verified delivery.",
+    "developerName": "kevinle128",
+    "category": "Productivity",
+    "capabilities": [
+      "Planning",
+      "Implementation"
+    ],
+    "defaultPrompt": "Create a plan with kevinle128-skills:plan, validate it with kevinle128-skills:validate-plan, then execute it with kevinle128-skills:implement."
+  }
+}
